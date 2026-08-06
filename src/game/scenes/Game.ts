@@ -586,6 +586,11 @@ export class Game extends Phaser.Scene
     clearText: Phaser.GameObjects.Text;
     gameoverText: Phaser.GameObjects.Text;
 
+    swipeStartX!: number;
+    swipeStartY!: number;
+    swipeDeltaX!: number;
+    swipeDeltaY!: number;
+
     preload ()
     {
         this.load.setPath('assets');
@@ -624,6 +629,20 @@ export class Game extends Phaser.Scene
         
 
         this.cursors = this.input.keyboard!.createCursorKeys();
+
+        this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+            this.swipeStartX = pointer.x;
+            this.swipeStartY = pointer.y;
+        });
+
+        this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+            if (pointer.isDown) {
+                this.player.sprite.x += pointer.x - this.swipeStartX;
+                this.player.sprite.y += pointer.y - this.swipeStartY;
+                this.swipeStartX = pointer.x;
+                this.swipeStartY = pointer.y;
+            }
+        });
 
         this.events.on("bossClear", async () => {
 
