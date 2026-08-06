@@ -36,7 +36,7 @@ class Enemy {
     type: EnemyType;
     hp: number;
     maxhp: number;
-    hpBar: Phaser.GameObjects.Graphics;
+    hpBar: Phaser.GameObjects.Image;
 
     constructor(
         scene: Phaser.Scene, 
@@ -54,7 +54,8 @@ class Enemy {
         this.sprite = scene.add.image(x, y, texture);
         this.hp = hp;
         this.maxhp = hp;
-        this.hpBar = scene.add.graphics();
+        this.hpBar = scene.add.image(x - 15, y + 16, "hpbar");
+        this.hpBar.setOrigin(0, 0.5);
     }
 
     update() { // 親クラスにないが子クラスでmove()関数を作る。
@@ -83,18 +84,10 @@ class Enemy {
     }
 
     drawHpBar() {
-        this.hpBar.clear();
+        this.hpBar.x = this.sprite.x - 15;
+        this.hpBar.y = this.sprite.y + 16;
 
-        const width = 30;
-        const height = 3;
-
-        this.hpBar.fillStyle(0x33cf33);
-        this.hpBar.fillRect(
-            this.sprite.x - width / 2,
-            this.sprite.y + 16,
-            width * this.hp / this.maxhp,
-            height
-        );
+        this.hpBar.setScale(this.hp / this.maxhp, 1);
 
 
     }
@@ -601,6 +594,7 @@ export class Game extends Phaser.Scene
         this.load.image('baikinman', 'baikinman.png');
         this.load.image('kabirunrun', 'kabirunrun.png');
         this.load.image('anpanti', 'anpanti.png');
+        this.load.image('hpbar', 'hpbar.png');
     }
 
     create ()
@@ -706,7 +700,7 @@ export class Game extends Phaser.Scene
 
     update() {
         if (gameover) {
-            this.gameoverText.text = "顔が濡れて力が出ない...\nページを再読み込みでリスタート";
+            this.gameoverText.text = "顔が汚れて力が出ない...\nページを再読み込みでリスタート";
         }else if (gameclear) {
 
         } else {
