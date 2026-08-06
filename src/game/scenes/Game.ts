@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { saveRanking, getRanking } from "./ranking";
 
 let gameover: boolean = false;
 
@@ -72,6 +73,10 @@ class Enemy {
         this.sprite.destroy();
         this.enemyManager.remove(this);
         this.hpBar.destroy();
+
+        if (this instanceof BossEnemy) {
+            this.scene.events.emit("bossClear");
+        }
     }
 
     drawHpBar() {
@@ -576,6 +581,9 @@ export class Game extends Phaser.Scene
     enemyManager!: EnemyManager;
     bulletManager!: BulletManager;
     collisionManager!: CollisionManager;
+    clearTime: number;
+    startTime: number;
+    clearText: Phaser.GameObjects.Text;
 
     preload ()
     {
@@ -593,6 +601,7 @@ export class Game extends Phaser.Scene
         this.player = new Player(this, 400, 500, this.bulletManager);
         this.enemyManager = new EnemyManager(this.player);
         this.collisionManager = new CollisionManager(this.player, this.enemyManager, this.bulletManager);
+        this.startTime = this.time.now;
 
         this.enemyManager.add(
             new BossEnemy(
@@ -608,6 +617,70 @@ export class Game extends Phaser.Scene
         
 
         this.cursors = this.input.keyboard!.createCursorKeys();
+
+        this.events.on("bossClear", async () => {
+
+            this.clearTime = 
+                (this.time.now - this.startTime) / 1000;
+
+            let ranking = await getRanking(); //この一回だけ
+
+            const isRankIn = 
+                ranking.length < 10 ||
+                this.clearTime < ranking[ranking.length - 1].time;
+            
+            if (isRankIn) {
+
+                const name = prompt(
+                    "ランキング入りしました！名前を入力してください"
+                );
+
+                if (name) {
+
+                    await saveRanking(
+                        name,
+                        this.clearTime
+                    );
+
+                    ranking.push({
+                        name: name,
+                        time: this.clearTime
+                    });
+
+                    ranking.sort(
+                        (a, b) => a.time - b.time
+                    );
+
+                    ranking = ranking.slice(0, 10);
+                }
+            }
+
+            let text = 
+                "clear time : " +
+                this.clearTime.toFixed(3) +
+                " sec\n\n";
+            
+            text += "ranking\n";
+
+            ranking.forEach((data, index) => {
+
+                text += 
+                    `${index + 1}位 ${data.name} ${data.time.toFixed(3)}秒\n`;
+
+            });
+
+            this.clearText = this.add.text(
+                350,
+                150,
+                text,
+                {
+                    fontSize: "28px",
+                    color: "#ffffff"
+                }
+            );
+
+            gameover = true;
+        })
     }
 
     update() {
