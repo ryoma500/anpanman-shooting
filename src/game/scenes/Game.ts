@@ -556,8 +556,8 @@ class CollisionManager {
             const dy = enemy.sprite.y - this.player.sprite.y;
 
             if (dx * dx + dy * dy < 20 * 20) {
-                enemy.destroy();
                 gameover = true;
+                enemy.destroy();
                 logEvent(
                     analytics,
                     "game_over"
@@ -627,74 +627,83 @@ export class Game extends Phaser.Scene
 
         this.events.on("bossClear", async () => {
 
-            this.clearTime = 
-                (this.time.now - this.startTime) / 1000;
+            if (gameover) {
+                logEvent(
+                    analytics,
+                    "hit_baikinman"
+                );
+            } else {
+                this.clearTime = 
+                    (this.time.now - this.startTime) / 1000;
 
-            logEvent(
-                analytics,
-                "game_clear",
-                {
-                    clear_time: this.clearTime
-                }
-            );
-
-            let ranking = await getRanking(); //この一回だけ
-
-            const isRankIn = 
-                ranking.length < 10 ||
-                this.clearTime < ranking[ranking.length - 1].time;
-            
-            if (isRankIn) {
-
-                const name = prompt(
-                    "ランキング入りしました！名前を入力してください"
+                logEvent(
+                    analytics,
+                    "game_clear",
+                    {
+                        clear_time: this.clearTime
+                    }
                 );
 
-                if (name) {
+                let ranking = await getRanking(); //この一回だけ
 
-                    await saveRanking(
-                        name,
-                        this.clearTime
+                const isRankIn = 
+                    ranking.length < 10 ||
+                    this.clearTime < ranking[ranking.length - 1].time;
+                
+                if (isRankIn) {
+
+                    const name = prompt(
+                        "ランキング入りしました！名前を入力してください"
                     );
 
-                    ranking.push({
-                        name: name,
-                        time: this.clearTime
-                    });
+                    if (name) {
 
-                    ranking.sort(
-                        (a, b) => a.time - b.time
-                    );
+                        await saveRanking(
+                            name,
+                            this.clearTime
+                        );
 
-                    ranking = ranking.slice(0, 10);
+                        ranking.push({
+                            name: name,
+                            time: this.clearTime
+                        });
+
+                        ranking.sort(
+                            (a, b) => a.time - b.time
+                        );
+
+                        ranking = ranking.slice(0, 10);
+                    }
                 }
+
+                let text = 
+                    "clear time : " +
+                    this.clearTime.toFixed(3) +
+                    " sec\n\n";
+                
+                text += "ranking\n";
+
+                ranking.forEach((data, index) => {
+
+                    text += 
+                        `${index + 1}位 ${data.name} ${data.time.toFixed(3)}秒\n`;
+
+                });
+
+                this.clearText = this.add.text(
+                    350,
+                    150,
+                    text,
+                    {
+                        fontSize: "28px",
+                        color: "#ffffff"
+                    }
+                );
+
+                gameclear = true;
             }
 
-            let text = 
-                "clear time : " +
-                this.clearTime.toFixed(3) +
-                " sec\n\n";
-            
-            text += "ranking\n";
 
-            ranking.forEach((data, index) => {
-
-                text += 
-                    `${index + 1}位 ${data.name} ${data.time.toFixed(3)}秒\n`;
-
-            });
-
-            this.clearText = this.add.text(
-                350,
-                150,
-                text,
-                {
-                    fontSize: "28px",
-                    color: "#ffffff"
-                }
-            );
-
-            gameclear = true;
         })
     }
 
