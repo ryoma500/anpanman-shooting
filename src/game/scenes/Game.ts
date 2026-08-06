@@ -687,22 +687,34 @@ export class Game extends Phaser.Scene
         if (gameover) {
 
         }else {
-        if (this.cursors.right.isDown) {
-            this.player.sprite.x += 3;
-        }
-        if (this.cursors.left.isDown) {
-            this.player.sprite.x -= 3;
-        }
-        if (this.cursors.up.isDown) {
-            this.player.sprite.y -= 3;
-        }
-        if (this.cursors.down.isDown) {
-            this.player.sprite.y += 3;
-        }
-        this.player.update();
-        this.enemyManager.update();
-        this.bulletManager.update();
-        this.collisionManager.update();
+            if (this.cursors.right.isDown) {
+                this.player.sprite.x += 3;
+            }
+            if (this.cursors.left.isDown) {
+                this.player.sprite.x -= 3;
+            }
+            if (this.cursors.up.isDown) {
+                this.player.sprite.y -= 3;
+            }
+            if (this.cursors.down.isDown) {
+                this.player.sprite.y += 3;
+            }
+            this.player.sprite.x = Phaser.Math.Clamp(
+                this.player.sprite.x,
+                0,
+                1280
+            );
+
+            this.player.sprite.y = Phaser.Math.Clamp(
+                this.player.sprite.y,
+                0,
+                720
+            );
+            
+            this.player.update();
+            this.enemyManager.update();
+            this.bulletManager.update();
+            this.collisionManager.update();
         }
 
     }
