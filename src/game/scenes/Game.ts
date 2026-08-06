@@ -1,5 +1,7 @@
 import * as Phaser from 'phaser';
 import { saveRanking, getRanking } from "./ranking";
+import { logEvent } from "firebase/analytics";
+import { analytics } from "../../../firebase";
 
 let gameover: boolean = false;
 
@@ -562,6 +564,10 @@ class CollisionManager {
             if (dx * dx + dy * dy < 20 * 20) {
                 enemy.destroy();
                 gameover = true;
+                logEvent(
+                    analytics,
+                    "game_over"
+                );
                 console.log("顔が汚れて力が出ない");
             }
         }
@@ -597,6 +603,10 @@ export class Game extends Phaser.Scene
 
     create ()
     {
+        logEvent(
+            analytics,
+            "game_start"
+        );
         this.bulletManager = new BulletManager();
         this.player = new Player(this, 400, 500, this.bulletManager);
         this.enemyManager = new EnemyManager(this.player);
@@ -619,6 +629,11 @@ export class Game extends Phaser.Scene
         this.cursors = this.input.keyboard!.createCursorKeys();
 
         this.events.on("bossClear", async () => {
+
+            logEvent(
+            analytics,
+            "game_clear"
+        );
 
             this.clearTime = 
                 (this.time.now - this.startTime) / 1000;

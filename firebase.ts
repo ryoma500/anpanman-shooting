@@ -9,6 +9,8 @@ import {
     getDocs
 } from "firebase/firestore";
 
+import { getAnalytics } from "firebase/analytics";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCuduKA7QPKL7NLbhyRenyhz9h5vBVkXc0",
   authDomain: "shooting-game-ranking.firebaseapp.com",
@@ -32,3 +34,6 @@ export {
     limit,
     getDocs
 };
+
+// Analytics開始
+export const analytics = getAnalytics(app);
