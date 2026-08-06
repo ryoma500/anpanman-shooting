@@ -143,9 +143,9 @@ class AimMookEnemy extends Enemy {
         this.sprite.x += Math.cos(this.angle) * speed;
         this.sprite.y += Math.sin(this.angle) * speed;
 
-        if (this.sprite.x < 0 || this.sprite.x > 1300) {
+        if (this.sprite.x < -20 || this.sprite.x > 1300) {
             this.destroy();
-        } else if (this.sprite.y < 0 || this.sprite.y > 700) {
+        } else if (this.sprite.y < -30 || this.sprite.y > 740) {
             this.destroy();
         }
     }
