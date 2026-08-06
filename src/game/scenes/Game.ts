@@ -4,6 +4,7 @@ import { logEvent } from "firebase/analytics";
 import { analytics } from "../../../firebase";
 
 let gameover: boolean = false;
+let gameclear: boolean = false;
 
 enum EnemyType {
     right = 1,
@@ -590,6 +591,7 @@ export class Game extends Phaser.Scene
     clearTime: number;
     startTime: number;
     clearText: Phaser.GameObjects.Text;
+    gameoverText: Phaser.GameObjects.Text;
 
     preload ()
     {
@@ -612,6 +614,7 @@ export class Game extends Phaser.Scene
         this.enemyManager = new EnemyManager(this.player);
         this.collisionManager = new CollisionManager(this.player, this.enemyManager, this.bulletManager);
         this.startTime = this.time.now;
+        this.gameoverText = this.add.text(400, 300, "", {fontSize: "50px", color: "#ffffff"});
 
         this.enemyManager.add(
             new BossEnemy(
@@ -630,13 +633,16 @@ export class Game extends Phaser.Scene
 
         this.events.on("bossClear", async () => {
 
-            logEvent(
-            analytics,
-            "game_clear"
-        );
-
             this.clearTime = 
                 (this.time.now - this.startTime) / 1000;
+
+            logEvent(
+                analytics,
+                "game_clear",
+                {
+                    clear_time: this.clearTime
+                }
+            );
 
             let ranking = await getRanking(); //この一回だけ
 
@@ -694,14 +700,16 @@ export class Game extends Phaser.Scene
                 }
             );
 
-            gameover = true;
+            gameclear = true;
         })
     }
 
     update() {
         if (gameover) {
+            this.gameoverText.text = "顔が濡れて力が出ない...\nページを再読み込みでリスタート";
+        }else if (gameclear) {
 
-        }else {
+        } else {
             if (this.cursors.right.isDown) {
                 this.player.sprite.x += 3;
             }
